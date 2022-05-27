@@ -1,0 +1,23 @@
+#%#% template for multi-stage golang docker build %#%#
+
+# builder will compile go executable. the base image includes tools to compile the go binary
+FROM golang:alpine as builder
+WORKDIR /app
+
+# first copy go.mod and download the dependencies
+COPY go.mod ./
+RUN go mod download
+
+# then copy your source (may need to change the directory, ie src/*.go)
+COPY *.go ./
+RUN CGO_ENABLED=0 GOOS=linux go build -o app .
+
+# use small base image for distribution, don't need any build tools in final image
+FROM alpine:latest
+
+# install any os dependencies required by app, may not be needed
+# RUN apk add ...
+
+COPY --from=builder /build/app /usr/local/bin/app
+
+CMD "app"
