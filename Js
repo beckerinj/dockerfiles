@@ -1,0 +1,13 @@
+#%#% template for javascript docker build %#%#
+
+FROM node:alpine
+WORKDIR /usr/src/app
+
+# install dependencies in earlier layer for caching
+COPY package*.json ./
+RUN npm i
+
+# move source into container
+COPY build ./build
+
+CMD node build/main.js
